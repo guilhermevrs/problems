@@ -1,96 +1,61 @@
-import java.io.*;
-import java.util.*;
-
-class Main{
-	static String ReadLn (int maxLg)  // utility function to read from stdin
-    {
-        byte lin[] = new byte [maxLg];
-        int lg = 0, car = -1;
-
-        try
-        {
-            while (lg < maxLg)
-            {
-                car = System.in.read();
-                if ((car < 0) || (car == '\n')) break;
-                lin [lg++] += car;
-            }
-        }
-        catch (IOException e)
-        {
-            return (null);
-        }
-
-        if ((car < 0) && (lg == 0)) return (null);  // eof
-        return (new String (lin, 0, lg));
-    }
-
-	public static void main(String args[]){
-		Main mywork = new Main();
-		mywork.Begin();
-	}
-
-
-	void Begin(){
-		int nStudents;
-		String input;
-		StringTokenizer idata;
-
-		int totalSpent;
-		int fairCost;
-		int more, less;
-		int[] costs;
-
-		boolean round;
-
-		while((input = Main.ReadLn(255))!=null){
-
-			idata = new StringTokenizer(input);
-			nStudents = Integer.parseInt(idata.nextToken());
-			if(nStudents == 0)
-				break;
-
-			totalSpent = 0;
-			costs = new int[nStudents];
-			int currentCost = 0;
-
-			for(int i = 0; i<nStudents; i++){
-				input = Main.ReadLn(255);
-				
-				input = input.replace(",","");
-
-				currentCost = (int)(Float.parseFloat(input) * 100);
-				costs[i] = currentCost;
-				totalSpent += currentCost;
-			}
-
-			round = (totalSpent % nStudents != 0);
-
-
-			fairCost = totalSpent / nStudents;
-			more = 0;
-			less = 0;
-
-			for(int i=0; i<nStudents; i++){
-				if(round && costs[i]>=fairCost + 1)
-					more += (costs[i] - (fairCost+1));
-				else if(!round && costs[i]>fairCost)
-					more += (costs[i] - fairCost);
-				else
-					less += (fairCost - costs[i]);
-
-			}
-
-			int amountExchange = (more > less)? more : less;
-
-			System.out.print("$"+(amountExchange/100) + ".");
-			
-			if(less % 100 < 10)
-				System.out.print("0");
-
-			System.out.println(amountExchange % 100);
-		}
-	}
-
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+ 
+class Main {
+ public static int calculateAmountToExchange(int[] expenses) {
+  int amountToExchange = 0; // amount in cents
+  int numberOfStudents = expenses.length;
+ 
+  // calculate the average expense
+  long averageExpense = 0; // in cents
+  long totalExpenses = 0; // in cents
+  for (double expense : expenses)
+   totalExpenses += expense;
+ 
+  averageExpense = Math.round((double) totalExpenses / numberOfStudents);
+  int totalReceived = 0, totalGiven = 0;
+  for (int i = 0; i < numberOfStudents; i++) {
+   long diff = expenses[i] - averageExpense;
+   if(diff > 0)
+    totalReceived += diff;
+   else
+    totalGiven -= diff;
+  }
+   
+  amountToExchange = totalReceived < totalGiven ? totalReceived : totalGiven;
+ 
+  return amountToExchange;
+ }
+ 
+ public static void main(String[] args) throws IOException {
+  final BufferedReader in = new BufferedReader(new InputStreamReader(
+    System.in));
+  String line;
+  int numberOfStudents = 0;
+  int[] expenses = null; // expenses in cents
+ 
+  while ((line = in.readLine()) != null) {
+   try {
+    numberOfStudents = Integer.parseInt(line);
+   } catch (NumberFormatException e) {
+    numberOfStudents = 0;
+   }
+   if (numberOfStudents == 0)
+    return; // stop reading when 0 is found in input
+ 
+   expenses = new int[numberOfStudents];
+   for (int i = 0; i < numberOfStudents; i++) {
+    line = in.readLine();
+    float value = Float.parseFloat(line) * 100;
+    expenses[i] = Math.round(value);
+   }
+ 
+   int amount = calculateAmountToExchange(expenses);
+   System.out.print("$"+amount/100+".");
+   if(amount%100 < 10)
+    System.out.print("0");
+   System.out.println(amount%100);
+  }
+ }
 }
